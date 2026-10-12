@@ -10,6 +10,7 @@ int main() {
 
     int i, j, pid;
 
+    // lock works, but is busy waiting
     int *turn;
     int shmid;
 

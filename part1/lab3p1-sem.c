@@ -9,10 +9,17 @@
 
 int main() {
 
-    int i, j, pid;
+    int i, j, shmid, pid;
+    sem_t *sem;
+
+    shmid = shmget(IPC_PRIVATE, sizeof(sem_t), IPC_CREAT | 0600);
+    sem = (sem_t *) shmat(shmid, NULL, 0);
+
+    sem_init(sem, 1, 1);
     
     for(i=0; i<NUM_PROCESSES; i++)
     {
+        sem_wait(sem);
         if((pid = fork()) == 0) {
             break;
         }
@@ -28,6 +35,7 @@ int main() {
 	    }
 
         printf("\n\n");
+        sem_post(sem);
     }
     else {
         for(i=0; i<NUM_PROCESSES; i++) 
