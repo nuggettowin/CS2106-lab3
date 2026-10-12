@@ -4,6 +4,7 @@
 #include <time.h>
 #include <sys/shm.h>
 #include <sys/wait.h>
+#include "barrier.h"
 
 #define NUM_PROCESSES  8
 
@@ -43,6 +44,9 @@ int main(int argc, char *argv[]) {
 
     shmid1 = shmget(IPC_PRIVATE, NUM_PROCESSES * sizeof(int), IPC_CREAT | 0600);
     counts = (int *) shmat(shmid1, NULL, 0);
+
+    init_barrier(NUM_PROCESSES);
+
     for (i = 0; i < NUM_PROCESSES; i++)
         counts[i] = 0;
 
@@ -66,6 +70,8 @@ int main(int argc, char *argv[]) {
             counts[i]++;
     }
 
+    reach_barrier();
+
     if (pid != 0)
     {
         for(j=0; j<NUM_PROCESSES; j++)
@@ -85,5 +91,6 @@ int main(int argc, char *argv[]) {
 
         shmdt(counts);
         shmctl(shmid1, IPC_RMID, 0);
+        destroy_barrier(pid);
     }
 }
