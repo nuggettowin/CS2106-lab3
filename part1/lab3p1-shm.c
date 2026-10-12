@@ -9,12 +9,22 @@
 int main() {
 
     int i, j, pid;
+
+    int *turn;
+    int shmid;
+
+    shmid = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | 0600);
+    turn = shmat(shmid, NULL, 0);
+    turn[0] = 0;
     
     for(i=0; i<NUM_PROCESSES; i++)
     {
+        while (turn[0] != i); // parent waits until turn done
+
         if((pid = fork()) == 0) {
             break;
         }
+
     }
 
     if(pid == 0) {
@@ -27,6 +37,8 @@ int main() {
 	    }
 
         printf("\n\n");
+
+        turn[0] += 1;
     }
     else {
         for(i=0; i<NUM_PROCESSES; i++) 
